@@ -1,0 +1,68 @@
+# YAML is a human-readable data serialization language that is often used for 
+# writing configuration files, using indentation to represent hierarchical relationships
+
+services:
+  # Database Service
+  mariadb:                             # do not expose port 3306 to public(only communicate in Docker internal network)
+    build:
+      context: ./requirements/mariadb  # find Dockerfile scripts and configs in this work directoy
+      dockerfile: Dockerfile
+    container_name: mariadb
+    env_file: .env                     
+    volumes:
+      - mariadb_data:/var/lib/mysql    # MariaDB Default Database Storage Directory in container
+    networks:
+      - inception_network
+    restart: always                    # Docker daemon restarts container automatically whenever it stops
+
+  # WordPress + PHP-FPM Service
+  wordpress:
+    depends_on:
+      - mariadb
+    build:
+      context: ./requirements/wordpress
+      dockerfile: Dockerfile
+    container_name: wordpress          # do not expose port 9000 to public(only communicate in Docker internal network)
+    env_file: .env
+    volumes:
+      - wordpress_data:/var/www/html
+    networks:
+      - inception_network
+    restart: always                    # Docker daemon restarts container automatically whenever it stops
+
+  # NGINX Service (The Gateway)
+  nginx:
+    depends_on:
+      - wordpress
+    build:
+      context: ./requirements/nginx
+      dockerfile: Dockerfile
+    container_name: nginx
+    env_file: .env                     
+    ports:
+      - "443:443"                      # HTTPS default port(external portal)
+    volumes:
+      - wordpress_data:/var/www/html
+    networks:
+      - inception_network
+    restart: always                    # Docker daemon restarts container automatically whenever it stops
+
+# Networks to allow containers to talk to each other
+networks:
+  inception_network:
+    driver: bridge
+
+# Volumes for data persistence (mapped to DATA_PATH in .env)
+volumes:
+  mariadb_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_PATH}/mariadb
+  wordpress_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_PATH}/wordpress

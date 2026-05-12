@@ -13,7 +13,7 @@ all: setup
 # -p = parent (create a directory if it does not exist)
 # rwx r-x r-x
 setup:
-@sudo mkdir -p $(DATA_PATH)/mariadb							
+	@sudo mkdir -p $(DATA_PATH)/mariadb							
 	@sudo mkdir -p $(DATA_PATH)/wordpress
 	@sudo chmod 755 $(DATA_PATH)/mariadb						
 	@sudo chmod 755 $(DATA_PATH)/wordpress

@@ -1,47 +1,61 @@
-#!/bin/bash
-set -e
+# setup shell script:
+# Configure the account password at the first start, and then run directly next time.
 
-# 确保运行时目录存在
-mkdir -p /run/mysqld
-chown -R mysql:mysql /run/mysqld
+#!/bin/bash                                                 # shebang, use /bin/bash executable to execute following codes
+set -e                                                      # -e(exit on error), stop execution if any command fails
 
-# 初始化数据库目录（如果没初始化过）
-if [ ! -d "/var/lib/mysql/mysql" ]; then
-    mysql_install_db --user=mysql --datadir=/var/lib/mysql
+mkdir -p /run/mysqld                                        # Ensure the runtime directory exists for the MySQL socket file
+chown -R mysql:mysql /run/mysqld                            # change owner user_name:group_name -R(recursive, change all the subfolers & files)
+
+if [ ! -d "/var/lib/mysql/mysql" ]; then                    # Initialize the database data directory if it's empty
+    mysql_install_db --user=mysql --datadir=/var/lib/mysql  # -d(if it is a directory) !(if not/not exist)
+                                                            # execute mysql_install_db (install database)
+                                                            # 1. create dir "/var/lib/mysql/mysql"
+                                                            # 2. change owner to mysql user
 fi
 
-# 以后台模式启动 MySQL 以进行初始化设置
-mysqld_safe --datadir=/var/lib/mysql &
+mysqld_safe --datadir=/var/lib/mysql &                      # Start MariaDB in the background to perform initial configuration
+                                                            # mysqld_safe: Secure startup script  &:run in background(allow script execution)
 
-# 等待 MySQL 启动完毕
-until mysqladmin ping >/dev/null 2>&1; do
-    echo "Waiting for MariaDB to start..."
+until mysqladmin ping >/dev/null 2>&1; do                   # check ping each 1s & print message untill MariaDB is fully started and responsive
+    echo "Waiting for MariaDB to start..."                  # /dev/null (discard normal output) 2>&1 (discard error output)
     sleep 1
 done
 
-# 执行初始化 SQL
+# Initialize SQL
 if [ ! -d "/var/lib/mysql/$SQL_DATABASE" ]; then
     echo "Initializing database..."
     
-    # 1. 创建数据库
-    mysql -e "CREATE DATABASE IF NOT EXISTS \`${SQL_DATABASE}\`;"
-    
-    # 2. 创建用户并授权（关键：统一使用 '%' 允许外部连接）
-    # 注意：在 GRANT 语句中直接指定 IDENTIFIED BY 会同时创建用户
+    mysql -e "CREATE DATABASE IF NOT EXISTS \`${SQL_DATABASE}\`;"  # 1. Create the database specified in the .env file
+                                                                   #    mysql: command line -e:execute
+                                                                   #    SQL syntax "create database": literally means create database
+                                                                   #               "if not exists":   literally
+                                                                   #    ${SQL_DATABASE}： will be replaced by the variable in .env (`backtick`--database name)
+
     mysql -e "GRANT ALL PRIVILEGES ON \`${SQL_DATABASE}\`.* TO \`${SQL_USER}\`@'%' IDENTIFIED BY '${SQL_PASSWORD}';"
-    
-    # 3. 修改 root 密码
+                                                                   # 2. Create the user & grand all privileges with password
+                                                                   #    SQL syntax "GRANT ALL PRIVILEGES": allow user totally control this database
+                                                                   #    "ON inception.*" : *all tables in database 
+                                                                   #    "TO yopeng@'%'" : allow connection from all IP
+                                                                   #    "IDENTIFIED BY 'pass_word' " : set password to this user
+
     mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '${SQL_ROOT_PASSWORD}';"
-    
-    # 4. 刷新权限
-    mysql -e "FLUSH PRIVILEGES;"
+                                                                   # 3. Secure the root account with a password
+                                                                   #    "ALTER USER": edit existed user information
+                                                                   #    'root'@'localhost': user name (e.g. yopeng@localhost)
+                                                                   #    "IDENTIFIED BY 'root_password'": set user password as root_password
+    mysql -e "FLUSH PRIVILEGES;"                                   # 4. Apply changes immediately
     
     echo "Database initialized successfully."
 fi
 
-# 关闭后台进程，准备通过 exec 启动前台进程
-mysqladmin -u root -p${SQL_ROOT_PASSWORD} shutdown
-
-# 使用 exec 启动前台进程，确保它是容器内的 PID 1
+mysqladmin -u root -p${SQL_ROOT_PASSWORD} shutdown          # Shutdown the background temporary process
+                                                            # mysqladmin: command line tool
+                                                            # -u root: root user
+                                                            # -p123456: give password
+                                                            # shutdown: stop elegantly & safely 
 echo "Starting MariaDB in foreground..."
-exec mysqld_safe --datadir=/var/lib/mysql
+
+exec mysqld_safe --datadir=/var/lib/mysql                   # Use 'exec' to start MariaDB in the foreground as PID 1
+                                                            # ensures the container keeps running as long as the database is alive
+                                                            # mysqld_safe: Secure startup script

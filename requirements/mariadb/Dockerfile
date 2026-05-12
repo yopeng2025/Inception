@@ -1,27 +1,27 @@
-FROM debian:bullseye
+# Dockerfile:
+# how to start with a pure operating system, install software, configure the environment step by step
 
-# Install MariaDB server and clean up cache
-RUN apt-get update && \
+FROM debian:bullseye                                             # base image for the container (stable version of Linux)
+
+RUN apt-get update && \                                          # install MariaDB server and clean up cache
     apt-get install -y mariadb-server && \
     rm -rf /var/lib/apt/lists/*
 
-# Copy the custom configuration file
-COPY conf/50-server.cnf /etc/mysql/mariadb.conf.d/50-server.cnf
+COPY conf/50-server.cnf /etc/mysql/mariadb.conf.d/50-server.cnf  # replace default file for the system with
+                                                                 # the custom configuration file(conf/50-server.cnf)
+                                                                 # which sets "bind-address = 0.0.0.0 (listen to internal inception-network)"
 
-# Create required directories and set permissions
-RUN mkdir -p /run/mysqld && \
-    chown -R mysql:mysql /run/mysqld && \
-    chown -R mysql:mysql /var/lib/mysql
+RUN mkdir -p /run/mysqld && \                                    # create socket file (for local communication)
+    chown -R mysql:mysql /run/mysqld && \                        # change owner user_name:group_name -R(recursive, change all the subfolers & files)
+    chown -R mysql:mysql /var/lib/mysql                          # give permission to user (not only root)to access socket and w&r persistent data
 
-# Copy the setup script and make it executable
-COPY tools/setup.sh /usr/local/bin/
+COPY tools/setup.sh /usr/local/bin/                              # standard location for Linux to store user-defined scripts
+                                                                 # create a database name, set an administrator password, and create a dedicated database user for WordPress
 
-RUN chmod +x /usr/local/bin/setup.sh
+RUN chmod +x /usr/local/bin/setup.sh                             # give permission to execute this script 
 
-# Expose the default MariaDB port
-EXPOSE 3306
+EXPOSE 3306                                                      # expose the default MariaDB port
 
-# Run the setup script
-ENTRYPOINT ["/usr/local/bin/setup.sh"]
+ENTRYPOINT ["/usr/local/bin/setup.sh"]                           # Run container -> Execute setup.script
 
 # MariaDB (mysql daemon) runs in foreground, therefore is it PID1 && main process

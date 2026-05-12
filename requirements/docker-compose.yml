@@ -1,0 +1,77 @@
+# YAML is a human-readable data serialization language that is often used for 
+# writing configuration files, using indentation to represent hierarchical relationships.
+
+# Docker-Compose: Command center of the entire project. 
+# It defines how three containers (services) are built, how they are connected, and how data is stored
+
+# Browser -[443]-> NGINX -[9000]-> WordPress -[3306]-> MariaDB
+# Data -> /home/yopeng/data
+
+services:
+  # Database Service
+  mariadb:                             # do not expose port 3306 to public(only communicate in Docker internal network)
+    build:
+      context: ./requirements/mariadb  # find Dockerfile scripts and configs in this work directoy
+      dockerfile: Dockerfile
+    container_name: mariadb            # official name of this docker
+    env_file: .env                     # read the environment variable file(database password)
+    volumes:
+      - mariadb_data:/var/lib/mysql    # MariaDB Default Database Storage Directory in container (for persistent data)
+    networks:                          # join the network and connect with other dockers
+      - inception_network
+    restart: always                    # Docker daemon restarts container automatically whenever it stops
+
+  # WordPress + PHP-FPM Service
+  wordpress:
+    depends_on:                        # 1. Run database -> 2. Run WordPress
+      - mariadb
+    build:                             # build WordPress IMAGE in this directory
+      context: ./requirements/wordpress # download base IMAGE and WordPress Source Code
+      dockerfile: Dockerfile
+    container_name: wordpress          # do not expose port 9000 to public(only communicate in Docker internal network)
+    env_file: .env
+    volumes:
+      - wordpress_data:/var/www/html   # mapping Web Source Code in IMAGE -> volumes; then container use the data from this volume
+    networks:
+      - inception_network
+    restart: always                    # Docker daemon restarts container automatically whenever it stops
+
+  # NGINX Service (Reverse Proxy: Gateway) 
+  nginx:
+    depends_on:                        # 1. Run WordPress -> 2. Run NGINX
+      - wordpress
+    build:
+      context: ./requirements/nginx
+      dockerfile: Dockerfile
+    container_name: nginx
+    env_file: .env                     
+    ports:
+      - "443:443"                      # Port Mapping: HTTPS default port(external portal) "host port:container port" ("make sure it is a string but not digits")
+    volumes:
+      - wordpress_data:/var/www/html   # mounts volume and reads static files (e.g., pictures, CSS) from WordPress
+    networks:
+      - inception_network
+    restart: always                    # Docker daemon restarts container automatically whenever it stops
+
+# Networks to allow containers to talk to each other
+networks:
+  inception_network:                   # Define a logical network
+    driver: bridge                     # Create a virtual network inside host 
+                                       # so that 3 containers can find each other through the container name(DNS service)
+                                       # e.g., dbhost=mariadb
+
+# Volumes for data persistence (mapped to DATA_PATH in .env (/home/yopeng/data))
+# COntainers = temporary
+volumes:
+  mariadb_data:
+    driver: local                      # Using local storage drivers
+    driver_opts:
+      type: none                       # do NOT create a new virtual file system (ext4 or NFs)
+      o: bind                          # bind mount: directly map to dedicated host directory(/home/yopeng/data)
+      device: ${DATA_PATH}/mariadb
+  wordpress_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_PATH}/wordpress

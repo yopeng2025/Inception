@@ -67,9 +67,11 @@ volumes:
     driver: local                      # Using local storage drivers
     driver_opts:
       type: none                       # do NOT create a new virtual file system (ext4 or NFs)
+      o: bind
       device: /home/yopeng/data/mariadb # all data are stored in Named Volume
   wordpress_data:
     driver: local
     driver_opts:
       type: none
+      o: bind
       device: /home/yopeng/data/wordpress

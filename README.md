@@ -49,9 +49,11 @@
         WP_USER_PASSWORD=[your-password]
   ```
 ### 3. Build and Run
-  `make` create directories, build images and start containers 
-  `make stop` stop all services
-  `make fclean` remove everything (containers, networks, volumes, and local data)
+  ```bash
+  make         #create directories, build images and start containers 
+  make stop    #stop all services
+  make fclean  #remove everything (containers, networks, volumes, and local data)
+  ```
 ### 4. Access the site
   Open a browser and navigate to `https://yopeng.42.fr`
   (Advance -> still continue)

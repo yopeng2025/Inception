@@ -1,0 +1,20 @@
+# 50-server.cnf:
+# Core configuration file of MariaDB
+# it specifies where database employees (mysql users) work, 
+# which door to use, 
+# and where they store their books.
+
+# below configurations for Server and Mysqld (daemon process) 
+[server]
+[mysqld]
+
+user = mysql
+pid-file = /run/mysqld/mysqld.pid       # where stores Process ID 
+socket = /run/mysqld/mysqld.sock        # where stores .sock(for local communication)
+port = 3306
+basedir = /usr                          # where to install MariaDB software
+datadir = /var/lib/mysql                # !!!where stores all tables, user information, blog content
+tmpdir = /tmp
+lc-messages-dir = /usr/share/mysql      # where stores LoCale error messages (in local language & format)
+bind-address  = 0.0.0.0                 # !!! ALLOW connections from any IP (Crucial for Docker networking)
+                                        # default = 127.0.0.1 (can only receive connection from mariadb container)

@@ -22,22 +22,24 @@ stop:
 
 # Down: Stop and remove containers, networks
 down:
-	@sudo docker-compose -f $(SRCS) down
+	@sudo docker-compose -f $(SRCS) down -v
+
+clean: down
+
+# Totally wipe out the persistent data from the host
 
 # prune = cut off; -a = all(unused resources)
 # delete images(unsused), containers(stopped), network(unused), cache; 
 # DANGEEROUS in real environment!
-clean: down
-	@sudo docker system prune -a
-
-# Totally wipe out the persistent data from the host
 # $$ = $ in shell;
 # $$(sudo dcoker volume ls -q) = execute "$(docker volume ls -q)" in shell"
 # -q = quiet (only show name, no other information)
 # || true = do not report error exit
 fclean: clean
+	@sudo docker system prune -a
 	@sudo docker volume rm $$(sudo docker volume ls -q) || true
-	@sudo rm -rf $(DATA_PATH)
+	@sudo rm -rf /home/yopeng/data/mariadb/*
+	@sudo rm -rf /home/yopeng/data/wordpress/*
 
 re: fclean all
 

@@ -1,10 +1,5 @@
-# setup shell script:
-# Configure the account password at the first start, and then run directly next time.
-
 #!/bin/bash
 
-# shebang, use /bin/bash executable to execute following codes             
-# -e(exit on error), stop execution if any command fails                                    
 set -e
 
 # Ensure the runtime directory exists for the MySQL socket file

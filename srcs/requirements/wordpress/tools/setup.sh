@@ -20,7 +20,7 @@ fi
 
 # 2. Start configuration if wp-config.php does not exist
 # wp-config.php is CORE file
-if [ ! -f wp-config.php ]; then
+if [ ! -f wp-config.php ] || ! wp core is-installed --allow-root; then
     echo "Configuring WordPress..."
 
     # Download WordPress CORE source files if index.php is missing
@@ -58,7 +58,12 @@ if [ ! -f wp-config.php ]; then
         --role=author
 
 else
-    echo "WordPress already configured."
+    echo "WordPress already configured. Checking database..."
+    until wp db check --allow-root; do
+	echo "waiting for MariaDB to response..."
+	sleep 2
+    done
+    echo "Database is ready!"
 fi
 
 # change owner user_name:group_name -R(recursive, change all the subfolers & files)

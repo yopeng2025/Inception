@@ -79,26 +79,28 @@ The communication flow between containers is strictly controlled within a privat
         `sudo nano /etc/hosts`, and add this line `127.0.0.1 [login].42.fr`
 2. Environment Variables
         create a `.env` file in the `srcs/` directory
-        `DOMAIN_NAME=[login].42.fr
-        DATA_PATH=/home/[login]/data
-        SQL_DATABASE=inception
-        SQL_USER=[login]
-        SQL_PASSWORD=[your-password]
-        SQL_ROOT_PASSWORD=[your-password]
-        WP_URL=[login].42.fr
-        WP_TITLE=Inception_Blog
-        WP_ADMIN_USER=wp_master
-        WP_ADMIN_PASSWORD=[your-password]
-        WP_USER=wp_user
-        WP_USER_PASSWORD=[your-password]`
-3. Build and Run
+```bash
+DOMAIN_NAME=[login].42.fr
+DATA_PATH=/home/[login]/data
+SQL_DATABASE=inception
+SQL_USER=[login]
+SQL_PASSWORD=[your-password]
+SQL_ROOT_PASSWORD=[your-password]
+WP_URL=[login].42.fr
+WP_TITLE=Inception_Blog
+WP_ADMIN_USER=wp_master
+WP_ADMIN_PASSWORD=[your-password]
+WP_USER=wp_user
+WP_USER_PASSWORD=[your-password]
+```
+4. Build and Run
         `make` create directories, build images and start containers 
         `make stop` stop all services
         `make clean` Stop and remove containers
         `make fclean` remove everything (containers, networks, volumes, and local data)
-4. Access the site
+5. Access the site
         Open a browser and navigate to `https://[login].42.fr`
         (Advance -> still continue)
-5. Inspect Volumes
+6. Inspect Volumes
         `docker volume inspect mariadb_data`
 

@@ -5,7 +5,7 @@
 # It defines how three containers (services) are built, how they are connected, and how data is stored
 
 # Browser -[443]-> NGINX -[9000]-> WordPress -[3306]-> MariaDB
-# Data -> /home/yopeng/data
+# Data -> /home/[login]/data
 
 services:
   # Database Service
@@ -25,6 +25,7 @@ services:
   wordpress:
     depends_on:                        # 1. Run database -> 2. Run WordPress
       - mariadb
+      - redis
     build:                             # build WordPress IMAGE in this directory
       context: ./requirements/wordpress # download base IMAGE and WordPress Source Code
       dockerfile: Dockerfile
@@ -48,11 +49,71 @@ services:
     ports:
       - "443:443"                      # Port Mapping: HTTPS default port(external portal) "host port:container port" ("make sure it is a string but not digits")
     volumes:
-      - wordpress_data:/var/www/html   # mounts volume and reads static files (e.g., pictures, CSS) from WordPress
+      - wordpress_data:/var/www/html   # mounts volume(wordpress_data) to directory(/var/www/html) in the container
     networks:
       - inception_network
     restart: always                    # Docker daemon restarts container automatically whenever it stops
 
+  # Bonus
+  redis:                               # Redis cache
+    build:
+      context: ./requirements/bonus/redis
+      dockerfile: Dockerfile
+    container_name: redis
+    env_file: .env
+    networks:
+      - inception_network
+    restart: always
+
+  adminer:                              # Database Management
+    build:
+      context: ./requirements/bonus/adminer
+      dockerfile: Dockerfile
+    container_name: adminer
+    ports:
+      - "8080:8080"
+    networks:
+      - inception_network
+    restart: always
+
+  ftp:                                  # FTP Server(Access to WordPress Volumes)
+    build:
+      context: ./requirements/bonus/ftp
+      dockerfile: Dockerfile
+    container_name: ftp
+    env_file: .env
+    ports:
+      - "21:21"
+      - "21100-21110:21100-21110"
+    volumes:
+      - wordpress_data:/var/www/html
+    networks:
+      - inception_network
+    restart: always
+
+  static_site:
+    build:
+      context: ./requirements/bonus/static_site
+      dockerfile: Dockerfile
+    container_name: static_site
+    networks:
+      - inception_network
+    restart: always
+
+  uptime-kuma:                        # Self-Hosted Monitoring Tool
+    build:
+      context: ./requirements/bonus/uptime_kuma
+      dockerfile: Dockerfile
+    container_name: uptime-kuma
+    ports:
+      - "3001:3001"
+    volumes:
+      - uptime_kuma_data:/app/data
+    networks:
+      - inception_network
+    restart: always
+
+  
 # Networks to allow containers to talk to each other
 networks:
   inception_network:                   # Define a logical network
@@ -75,3 +136,9 @@ volumes:
       type: none
       o: bind
       device: /home/yopeng/data/wordpress
+  uptime_kuma_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/yopeng/data/uptime_kuma

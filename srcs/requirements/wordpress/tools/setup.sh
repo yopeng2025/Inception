@@ -57,6 +57,19 @@ if [ ! -f wp-config.php ] || ! wp core is-installed --allow-root; then
         --user_pass="$WP_USER_PASSWORD" \
         --role=author
 
+    # Redis configuration
+    # use wp-cli to write down directly 
+    wp config set WP_REDIS_HOST redis --allow-root
+    wp config set WP_REDIS_PORT 6379 --allow-root
+    wp config set WP_REDIS_PASSWORD "${REDIS_PASSWORD}" --allow-root
+    wp config set WP_REDIS_PREFIX "inception_" --allow-root
+
+    # install & activate redis-cache (after installing wp core)
+    wp plugin install redis-cache --activate --allow-root
+
+    # turn on cache function
+    wp redis enable --allow-root
+
 else
     echo "WordPress already configured. Checking database..."
     until wp db check --allow-root; do

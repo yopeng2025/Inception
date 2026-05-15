@@ -5,9 +5,11 @@ FROM debian:bullseye
 
 # Install PHP env(php php-fpm php-cli) databasesupport(php-mysql mariadb-client) Curl(download wp-cli)
 # PHP FastCGI Process Manager 
+# download PHP Redis extension
 # clean up cache
 RUN apt-get update && \
     apt-get install -y php php-cli php-fpm php-mysql curl mariadb-client && \
+    apt-get install -y php-redis && \
     rm -rf /var/lib/apt/lists/*
 
 # replace default file for the system with

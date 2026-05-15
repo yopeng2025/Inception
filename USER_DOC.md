@@ -30,35 +30,6 @@ PHP-FPM (FastCGI Process Manager): Handles the processing of PHP code. It genera
     Purpose: Allows isolated containers to "talk" to each other securely.
     Example: WordPress needs to communicate with MariaDB to fetch posts. We use a Docker Bridge Network so they can find each other using their container names as hostnames.
 
-## Design Choices
-1. Virtual Machine vs Docker
-    Virtual Machine (VM) virtualize the hardware. Each VM includes a full Guest OS, making it heavy (GBs), slow to boot, and resource-intensive.
-
-    Docker (Container) virtualize the OS. Containers share the host kernel but remain isolated. Tehy are lightweight (MBs), start in seconds, and have near-native performance.
-
-    Choice: Docker is chosen to ensure protability and high resource efficiency.
-
-2. Secrets vs Environment Variables
-    Secrects (file) encrypted at rest and only mounted into the container's memory during runtime.
-    
-    Environment Variables (.env) are stored in plain text within the container's environment. They are easy to use but can be leaked through `docker inspect` or process logs.
-    
-    Choice: While the 42 subject allows Environment Variables (.env), Secrets (file) is the best practice for production environments to prevent credential leakage.
-
-3. Docker Network vs Host Network
-    Host Network allows container share host's IP and port space directly. There is no isolation between the container and the host's network stack.
-
-    Docker Network (bridge) creates a private virtual network. Containers can communicate with each other using internal DNS, and only specific ports (443) goes through to the host.
-
-    Choice: Docker Network is used to ensure the database remains hidden from the public internet.
-
-4. Docker Volume vs Bind Mounts
-    Bind Mounts link a specific path on the host to a path in the container. They depend on the host's file system structure.
-    
-    Docker Volume manages entirely by docker. They are indenpendent of the host's directory structure and are the preferred way to persist data in production.
-    
-    Choice: Data Named Volume are used to comply with the requirement for managed data persistence while stilling mapping them to `/home/[login]/data`. 
-
 ## Managing the Project (Start & Stop)
 
 All operations are automated via the `Makefile` in the root directory.
@@ -71,7 +42,7 @@ All operations are automated via the `Makefile` in the root directory.
     make fclean # To stop containers and delete all networks, images, and all persistent data
     ```
 ### Access website
-1. map domain to local machine in `sudo nano /etc/hosts`: add line `127.0.0.1 yopeng.42.fr`
+1. map domain to local machine in `sudo nano /etc/hosts`: add line `127.0.0.1 [login].42.fr`
 2. create a `.env` file in the `srcs/` directory, and put credentials inside.
         `DOMAIN_NAME=[login].42.fr
         DATA_PATH=/home/[login]/data
@@ -85,8 +56,8 @@ All operations are automated via the `Makefile` in the root directory.
         WP_ADMIN_PASSWORD=[your-password]
         WP_USER=wp_user
         WP_USER_PASSWORD=[your-password]`
-3. URL: `https://yopeng.42.fr`, accept the self-signed certificate warning in browser(Advanced->Proceed)
-4. URL: `https://yopeng.42.fr/wp-admin` to manage the WordPress site, using the admin credentials defined in `/inception/srcs/.env` file`
+3. URL: `https://[login].42.fr`, accept the self-signed certificate warning in browser(Advanced->Proceed)
+4. URL: `https://[login].42.fr/wp-admin` to manage the WordPress site, using the admin credentials defined in `/inception/srcs/.env` file`
 
 ### Verify Service
     ```bash
@@ -96,6 +67,6 @@ All operations are automated via the `Makefile` in the root directory.
     docker logs wordpress
     docker logs mariadb
 
-    ls -la /home/yopeng/data/wordpress  # Check WordPress and MariaDB are written to the host
-    ls -la /home/yopeng/data/mariadb
+    ls -la /home/[login]/data/wordpress  # Check WordPress and MariaDB are written to the host
+    ls -la /home/[login]/data/mariadb
     ```

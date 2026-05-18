@@ -35,40 +35,38 @@ PHP-FPM (FastCGI Process Manager): Handles the processing of PHP code. It genera
 All operations are automated via the `Makefile` in the root directory.
 
 ### Start the project
-```bash
-make        # To create the local data directories and launch all containers
-make stop   # To stop the running containers without removing them
-make clean  # to stop and remove containers, networks
-make fclean # To stop containers and delete all networks, images, and all persistent data
-```
+    ```bash
+    make        # To create the local data directories and launch all containers
+    make stop   # To stop the running containers without removing them
+    make clean  # to stop and remove containers, networks
+    make fclean # To stop containers and delete all networks, images, and all persistent data
+    ```
 ### Access website
 1. map domain to local machine in `sudo nano /etc/hosts`: add line `127.0.0.1 [login].42.fr`
 2. create a `.env` file in the `srcs/` directory, and put credentials inside.
-```bash
-DOMAIN_NAME=[login].42.fr
-DATA_PATH=/home/[login]/data
-SQL_DATABASE=inception
-SQL_USER=[login]
-SQL_PASSWORD=[your-password]
-SQL_ROOT_PASSWORD=[your-password]
-WP_URL=[login].42.fr
-WP_TITLE=Inception_Blog
-WP_ADMIN_USER=wp_master
-WP_ADMIN_PASSWORD=[your-password]
-WP_USER=wp_user
-WP_USER_PASSWORD=[your-password]
-```
+        `DOMAIN_NAME=[login].42.fr
+        DATA_PATH=/home/[login]/data
+        SQL_DATABASE=inception
+        SQL_USER=[login]
+        SQL_PASSWORD=[your-password]
+        SQL_ROOT_PASSWORD=[your-password]
+        WP_URL=[login].42.fr
+        WP_TITLE=Inception_Blog
+        WP_ADMIN_USER=wp_master
+        WP_ADMIN_PASSWORD=[your-password]
+        WP_USER=wp_user
+        WP_USER_PASSWORD=[your-password]`
 3. URL: `https://[login].42.fr`, accept the self-signed certificate warning in browser(Advanced->Proceed)
 4. URL: `https://[login].42.fr/wp-admin` to manage the WordPress site, using the admin credentials defined in `/inception/srcs/.env` file`
 
 ### Verify Service
-```bash
-docker ps                            # Check container status: should show "UP" status
+    ```bash
+    docker ps           # Check container status: should show "UP" status
 
-docker logs nginx                    # Check logs for errors
-docker logs wordpress
-docker logs mariadb
+    docker logs nginx   # Check logs for errors
+    docker logs wordpress
+    docker logs mariadb
 
-ls -la /home/[login]/data/wordpress  # Check WordPress and MariaDB are written to the host
-ls -la /home/[login]/data/mariadb
-```
+    ls -la /home/[login]/data/wordpress  # Check WordPress and MariaDB are written to the host
+    ls -la /home/[login]/data/mariadb
+    ```

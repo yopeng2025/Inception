@@ -13,7 +13,9 @@ Process Management: Every container runs its main process as PID1 for proper sig
 No Latest Tags:     All base images use specific version - Debian Bullseye for its security, small footprint and   compatibility with PHP-FPM 7.4.
 
 The communication flow between containers is strictly controlled within a private bridge network:
+                      ---------------------------------------------------------
 `Browser` <--(443)--> |`Nginx` <--(9000)--> `WordPress` <--(3306)--> `MariaDB`|
+                      ---------------------------------------------------------
 
 ## Structure
 ```bash
@@ -79,20 +81,18 @@ The communication flow between containers is strictly controlled within a privat
         `sudo nano /etc/hosts`, and add this line `127.0.0.1 [login].42.fr`
 2. Environment Variables
         create a `.env` file in the `srcs/` directory
-```bash
-DOMAIN_NAME=[login].42.fr
-DATA_PATH=/home/[login]/data
-SQL_DATABASE=inception
-SQL_USER=[login]
-SQL_PASSWORD=[your-password]
-SQL_ROOT_PASSWORD=[your-password]
-WP_URL=[login].42.fr
-WP_TITLE=Inception_Blog
-WP_ADMIN_USER=wp_master
-WP_ADMIN_PASSWORD=[your-password]
-WP_USER=wp_user
-WP_USER_PASSWORD=[your-password]
-```
+        `DOMAIN_NAME=[login].42.fr
+        DATA_PATH=/home/[login]/data
+        SQL_DATABASE=inception
+        SQL_USER=[login]
+        SQL_PASSWORD=[your-password]
+        SQL_ROOT_PASSWORD=[your-password]
+        WP_URL=[login].42.fr
+        WP_TITLE=Inception_Blog
+        WP_ADMIN_USER=wp_master
+        WP_ADMIN_PASSWORD=[your-password]
+        WP_USER=wp_user
+        WP_USER_PASSWORD=[your-password]`
 3. Build and Run
         `make` create directories, build images and start containers 
         `make stop` stop all services

@@ -5,7 +5,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # copy my static site to Nginx's default directory
-COPY conf/index.html /var/www/html/index.html
+COPY index.html /var/www/html/index.html
 
 # change Nginx configuration:
 #   listen port 80

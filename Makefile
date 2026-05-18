@@ -1,6 +1,8 @@
 NAME = inception
 SRCS = ./srcs/docker-compose.yml
 DATA_PATH = /home/yopeng/data
+BONUS_PATH = $(DATA_PATH)/static_site $(DATA_PATH)/adminer \
+			 $(DATA_PATH)/redis $(DATA_PATH)/ftp $(DATA_PATH)/uptime_kuma
 
 # Create necessary data directories before running containers
 # -p = parent (create a directory if it does not exist)
@@ -12,8 +14,10 @@ DATA_PATH = /home/yopeng/data
 all:				
 	@sudo mkdir -p $(DATA_PATH)/mariadb
 	@sudo mkdir -p $(DATA_PATH)/wordpress
+	@sudo mkdir -p $(BONUS_PATH)
 	@sudo chmod 777 $(DATA_PATH)/mariadb
 	@sudo chmod 777 $(DATA_PATH)/wordpress
+	@sudo chmod 777 $(BONUS_PATH)
 	@sudo docker-compose -f $(SRCS) -p $(NAME) up -d --build
 
 # Stop containers
@@ -40,6 +44,11 @@ fclean: clean
 	@sudo docker volume rm $$(sudo docker volume ls -q) || true
 	@sudo rm -rf /home/yopeng/data/mariadb/*
 	@sudo rm -rf /home/yopeng/data/wordpress/*
+	@sudo rm -rf /home/yopeng/data/static_site/*
+	@sudo rm -rf /home/yopeng/data/adminer/*
+	@sudo rm -rf /home/yopeng/data/redis/*
+	@sudo rm -rf /home/yopeng/data/ftp/*
+	@sudo rm -rf /home/yopeng/data/uptime_kuma/*
 
 re: fclean all
 

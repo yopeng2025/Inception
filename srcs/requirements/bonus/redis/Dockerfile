@@ -21,4 +21,5 @@ EXPOSE 6379
 # but need a password to ensure security
 # sh -c: Let SHell Command parse the variables ${REDIS_PASSWORD} (JSON array does not automatically expand the shell variable)
 # /etc/redis/redis.conf： allow previous "sed" command changes works
-CMD ["sh", "-c", "redis-server /etc/redis/redis.conf --requirepass ${REDIS_PASSWORD} --protected-mode no"]
+# --daemonize no: do not run in background (/etc/redis/redis.conf has "daemonize yes", need to overwrite)
+CMD ["sh", "-c", "redis-server /etc/redis/redis.conf --requirepass ${REDIS_PASSWORD} --protected-mode no --daemonize no"]

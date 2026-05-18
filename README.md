@@ -151,13 +151,15 @@ FTP_PASSWORD=[your-password]
 4. Access the site
         Open a browser and navigate to `https://[login].42.fr`
         (Advance -> still continue)
-        | Service | URL / Port |
-        |----------|-------------|
-        | WordPress | https://[login].42.fr |
-        | Adminer | https://[login].42.fr/adminer |
-        | Static Site | https://[login].42.fr/static |
-        | Uptime Kuma | http://localhost:3001 |
-        | FTP | Port 21 + PASV 21100-21110 |
+   
+| Service | URL / Port |
+|----------|-------------|
+| WordPress | https://[login].42.fr |
+| Adminer | https://[login].42.fr/adminer |
+| Static Site | https://[login].42.fr/static |
+| Uptime Kuma | http://localhost:3001 |
+| FTP | Port 21 + PASV 21100-21110 |
+
 5. Inspect Volumes
         `docker volume inspect mariadb_data`
 
